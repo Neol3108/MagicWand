@@ -1,0 +1,8 @@
+name: MagicWand
+main: codes.noel.magicwand.Plugin
+version: 0.0.1-SNAPSHOT
+api-version: 1.13
+commands:
+   mw:
+      description: Magic wand main command
+      usage: /mw
