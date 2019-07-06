@@ -3,6 +3,7 @@ package codes.noel.magicwand;
 import java.util.ArrayList;
 
 import org.bukkit.Material;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
@@ -12,19 +13,25 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 
+import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.ChatMessageType;
+import net.md_5.bungee.api.chat.ComponentBuilder;
+
 public class MagicWand {
 
 	public static final String abilityKey = "abilities";
 	
 	protected static AbilityManager abilityManager;
 
+	private Player player;
 	private Plugin plugin;
 	private ItemStack itemStack;
 	private ArrayList<String> abilities = new ArrayList<String>();
 	private Class<? extends Ability> activeAbility;
 
 	@SuppressWarnings("unchecked")
-	public MagicWand(Plugin plugin, ItemStack itemStack) {
+	public MagicWand(Plugin plugin, Player player, ItemStack itemStack) {
+		this.player = player;
 		this.plugin = plugin;
 		this.itemStack = itemStack;
 
@@ -50,8 +57,10 @@ public class MagicWand {
 		if (activeAbility != null) {
 			try {
 				Class<?> act = Class.forName(activeAbility);
-				if (act.isAssignableFrom(Ability.class)) {
-					this.activeAbility = (Class<Ability>) act;
+				if (Ability.class.isAssignableFrom(act)) {
+					if (abilityManager.hasAbility(((Class<? extends Ability>) act))) {
+						this.activeAbility = (Class<Ability>) act;
+					}
 				}
 			} catch (ClassNotFoundException e) {
 				e.printStackTrace();
@@ -123,7 +132,6 @@ public class MagicWand {
 	
 	public MagicWand setActiveAbility(Class<? extends Ability> clazz)
 	{
-		this.plugin.broadcast(clazz.getName());
 		if (this.abilities.contains(clazz.getName())) {
 			this.activeAbility = clazz;
 			
@@ -133,8 +141,38 @@ public class MagicWand {
 		return this;
 	}
 	
+	@SuppressWarnings("unchecked")
+	public MagicWand selectNext()
+	{
+		int index = 0;
+		
+		if (this.abilities.contains(this.activeAbility.getName())) {
+			index = this.abilities.indexOf(this.activeAbility.getName());
+			
+			if (++index >= this.abilities.size()) {
+				index = 0;
+			}
+		}
+		
+		try {
+			this.setActiveAbility((Class<? extends Ability>) Class.forName(this.abilities.get(index)));
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		}
+		
+
+		this.player.spigot().sendMessage(ChatMessageType.ACTION_BAR, new ComponentBuilder(this.activeAbility.getName()).color(ChatColor.AQUA).create());
+		
+		return this;
+	}
+	
+	public static AbilityManager getAbilityManager()
+	{
+		return abilityManager;
+	}
+	
 	@SafeVarargs
-	public static MagicWand build(Plugin plugin, Class<? extends Ability>... abilities)
+	public static MagicWand build(Plugin plugin, Player player, Class<? extends Ability>... abilities)
 	{
 		ItemStack itemStack = new ItemStack(Material.BLAZE_ROD);
 		ItemMeta meta = itemStack.getItemMeta();
@@ -143,7 +181,7 @@ public class MagicWand {
 		
 		itemStack.setItemMeta(meta);
 		
-		return new MagicWand(plugin, itemStack)
+		return new MagicWand(plugin, player, itemStack)
 				.addAbility(abilities)
 				.setActiveAbility(abilities[0])
 				.updateItemMeta();

@@ -7,6 +7,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import codes.noel.magicwand.abilities.Comet;
+import codes.noel.magicwand.abilities.Leap;
 import codes.noel.magicwand.listeners.ClickListener;
 
 public class Plugin extends JavaPlugin {
@@ -16,7 +17,16 @@ public class Plugin extends JavaPlugin {
 		this.getServer().getPluginManager().registerEvents(new ClickListener(this), this);
 		this.getCommand("mw").setExecutor(this);
 		
-		new AbilityManager();
+		AbilityManager abilityManager = new AbilityManager();
+		try {
+			abilityManager
+			.addAbility(Leap.class)
+			.addAbility(Comet.class);
+		} catch (InstantiationException e) {
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	@Override
@@ -25,7 +35,7 @@ public class Plugin extends JavaPlugin {
 		case "mw":
 			if (sender instanceof Player) {
 				Player player = (Player) sender;
-				player.getInventory().addItem(MagicWand.build(this, Comet.class).getItemStack());
+				player.getInventory().addItem(MagicWand.build(this, player, Leap.class, Comet.class).getItemStack());
 				return true;
 			}
 			break;

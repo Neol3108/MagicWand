@@ -22,10 +22,9 @@ public class ClickListener implements Listener {
 	{
 		Action action = event.getAction();
 		if (action == Action.RIGHT_CLICK_AIR || action == Action.RIGHT_CLICK_BLOCK) {
-			MagicWand magicwand = new MagicWand(plugin, event.getItem());
-			for (String ability : magicwand.getAbilities()) {
-				plugin.getServer().broadcastMessage(ability);
-			}
+			MagicWand magicwand = new MagicWand(plugin, event.getPlayer(), event.getItem());
+			magicwand.selectNext();
+			event.setCancelled(true);
 		}
 	}
 	
@@ -34,10 +33,13 @@ public class ClickListener implements Listener {
 	{
 		Action action = event.getAction();
 		if (action == Action.LEFT_CLICK_AIR || action == Action.LEFT_CLICK_BLOCK) {
-			MagicWand magicwand = new MagicWand(plugin, event.getItem());
+			MagicWand magicWand = new MagicWand(plugin, event.getPlayer(), event.getItem());
 
-			Class<? extends Ability> activeAbility = magicwand.activeAbility();
-			this.plugin.broadcast(activeAbility != null ? activeAbility.getName() : "null");
+			Class<? extends Ability> activeAbility = magicWand.activeAbility();
+			
+			MagicWand.getAbilityManager().execute(activeAbility, event.getPlayer(), magicWand);
+			
+			event.setCancelled(true);
 		}
 	}
 }

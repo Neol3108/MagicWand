@@ -2,6 +2,8 @@ package codes.noel.magicwand;
 
 import java.util.HashMap;
 
+import org.bukkit.entity.Player;
+
 public class AbilityManager {
 	private HashMap<String, Ability> abilities = new HashMap<String, Ability>();
 	
@@ -19,11 +21,26 @@ public class AbilityManager {
 		return this.getAbility(clazz.getName());
 	}
 	
-	public AbilityManager addAbility(Class<Ability> clazz) throws InstantiationException, IllegalAccessException
+	public boolean hasAbility(String key)
+	{
+		return this.abilities.containsKey(key);
+	}
+	
+	public boolean hasAbility(Class<? extends Ability> clazz)
+	{
+		return this.hasAbility(clazz.getName());
+	}
+	
+	public AbilityManager addAbility(Class<? extends Ability> clazz) throws InstantiationException, IllegalAccessException
 	{
 		Ability ability = clazz.newInstance();
 		this.abilities.put(clazz.getName(), ability);
 		
 		return this;
+	}
+	
+	public void execute(Class<? extends Ability> ability, Player player, MagicWand magicWand)
+	{
+		this.getAbility(ability).execute(player, magicWand);
 	}
 }
