@@ -1,5 +1,7 @@
 package codes.noel.magicwand;
 
+import java.lang.reflect.InvocationTargetException;
+
 import org.bukkit.NamespacedKey;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -13,26 +15,25 @@ import codes.noel.magicwand.listeners.ClickListener;
 import codes.noel.magicwand.listeners.InventoryListener;
 
 public class Plugin extends JavaPlugin {
-	
+
 	@Override
 	public void onEnable() {
 		this.getServer().getPluginManager().registerEvents(new ClickListener(this), this);
 		this.getServer().getPluginManager().registerEvents(new InventoryListener(this), this);
 		this.getCommand("mw").setExecutor(this);
-		
+
 		AbilityManager abilityManager = new AbilityManager();
+
 		try {
 			abilityManager
 			.addAbility(Leap.class)
 			.addAbility(Skydiver.class)
 			.addAbility(Comet.class);
-		} catch (InstantiationException e) {
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
+		} catch (IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException e) {
 			e.printStackTrace();
 		}
 	}
-	
+
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
 		switch (command.getName()) {
@@ -46,12 +47,12 @@ public class Plugin extends JavaPlugin {
 		}
 		return false;
 	}
-	
+
 	public NamespacedKey getMetaKey(String key)
 	{
 		return new NamespacedKey(this, key);
 	}
-	
+
 	public void broadcast(String ...messages)
 	{
 		for (String message : messages) {

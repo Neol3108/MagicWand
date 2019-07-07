@@ -1,5 +1,6 @@
 package codes.noel.magicwand;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 
 import org.bukkit.entity.Player;
@@ -31,9 +32,9 @@ public class AbilityManager {
 		return this.hasAbility(clazz.getName());
 	}
 	
-	public AbilityManager addAbility(Class<? extends Ability> clazz) throws InstantiationException, IllegalAccessException
+	public AbilityManager addAbility(Class<? extends Ability> clazz) throws IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException
 	{
-		Ability ability = clazz.newInstance();
+		Ability ability = clazz.getDeclaredConstructor().newInstance();
 		this.abilities.put(clazz.getName(), ability);
 		
 		return this;
