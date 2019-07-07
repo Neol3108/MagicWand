@@ -13,11 +13,12 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 
+import codes.noel.magicwand.wands.OnEquip;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 
-public class MagicWand {
+public class MagicWand implements OnEquip {
 
 	public static final String abilityKey = "abilities";
 	
@@ -28,16 +29,39 @@ public class MagicWand {
 	private ItemStack itemStack;
 	private ArrayList<String> abilities = new ArrayList<String>();
 	private Class<? extends Ability> activeAbility;
+	
+	protected MagicWand(Plugin plugin, Player player, ItemStack itemStack) throws Exception {
+		this(plugin, player, itemStack, false);
+	}
 
 	@SuppressWarnings("unchecked")
-	public MagicWand(Plugin plugin, Player player, ItemStack itemStack) {
+	protected MagicWand(Plugin plugin, Player player, ItemStack itemStack, boolean create) throws Exception {
 		this.player = player;
 		this.plugin = plugin;
 		this.itemStack = itemStack;
+		
+		ItemMeta meta = itemStack.getItemMeta();
 
-		PersistentDataContainer pdc = itemStack
-				.getItemMeta()
-				.getPersistentDataContainer();
+		PersistentDataContainer pdc = meta.getPersistentDataContainer();
+		
+		if (create) {
+			pdc.set(plugin.getMetaKey("magicWand"), PersistentDataType.STRING, getClass().getName());
+			this.itemStack.setItemMeta(meta);
+		} else {
+			String wandClassName = pdc.get(plugin.getMetaKey("magicWand"), PersistentDataType.STRING);
+			
+			Exception notAWand = new Exception("This is not a Magic Wand!");
+			
+			if (wandClassName == null) {
+				throw notAWand;
+			}
+			
+			Class<?> wandClass = Class.forName(wandClassName);
+			
+			if (!MagicWand.class.isAssignableFrom(wandClass)) {
+				throw notAWand;
+			}
+		}
 
 		String abilities = pdc.get(
 				plugin.getMetaKey("abilities"),
@@ -171,6 +195,15 @@ public class MagicWand {
 		return abilityManager;
 	}
 	
+	public static MagicWand fromItemStack(Plugin plugin, Player player, ItemStack itemStack)
+	{
+		try {
+			return new MagicWand(plugin, player, itemStack);
+		} catch (Exception e) {
+			return null;
+		}
+	}
+	
 	@SafeVarargs
 	public static MagicWand build(Plugin plugin, Player player, Class<? extends Ability>... abilities)
 	{
@@ -181,9 +214,25 @@ public class MagicWand {
 		
 		itemStack.setItemMeta(meta);
 		
-		return new MagicWand(plugin, player, itemStack)
-				.addAbility(abilities)
-				.setActiveAbility(abilities[0])
-				.updateItemMeta();
+		try {
+			return new MagicWand(plugin, player, itemStack, true)
+					.addAbility(abilities)
+					.setActiveAbility(abilities[0])
+					.updateItemMeta();
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	@Override
+	public void onEquip(Player player, MagicWand wand) {
+		plugin.broadcast("Equiped " + player.getName());
+	}
+
+	@Override
+	public void onDequip(Player player, MagicWand wand) {
+		plugin.broadcast("Dequiped " + player.getName());
+		
 	}
 }
