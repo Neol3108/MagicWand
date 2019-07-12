@@ -2,6 +2,7 @@ package codes.noel.magicwand.abilities;
 
 import java.util.ArrayList;
 
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.TNTPrimed;
 import org.bukkit.util.Vector;
@@ -15,6 +16,7 @@ public class Tornado extends Ability {
 	private static float radius = 1.75F;
 	private static Long firstDelay = 15L;
 	private static Long secondDelay = 10L;
+	private static int fuseTicks = 40;
 	
 	@Override
 	public void execute(Player player, MagicWand magicWand) {
@@ -22,7 +24,7 @@ public class Tornado extends Ability {
 		
 		for (int i = 0; i < tnts; i++) {
 			TNTPrimed tnt = player.getWorld().spawn(player.getLocation(), TNTPrimed.class);
-			tnt.setFuseTicks(40);
+			tnt.setFuseTicks(fuseTicks);
 			tnt.setVelocity(new Vector(0, 2, 0));
 			tntArray.add(tnt);
 		}
@@ -52,6 +54,16 @@ public class Tornado extends Ability {
 				}
 			}
 		}, firstDelay + secondDelay);
+		
+		plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin, new Runnable() {
+			@Override
+			public void run() {
+				for (TNTPrimed tntPrimed : tntArray) {
+					Location location = tntPrimed.getLocation().subtract(0, 2, 0);
+					location.getWorld().strikeLightning(location);
+				}
+			}
+		}, fuseTicks);
 	}
 
 }

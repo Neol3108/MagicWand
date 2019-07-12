@@ -16,12 +16,12 @@ import codes.noel.magicwand.listeners.ClickListener;
 import codes.noel.magicwand.listeners.InventoryListener;
 
 public class Plugin extends JavaPlugin {
-
-	protected static Plugin plugin;
 	
 	@Override
 	public void onEnable() {
 		Ability.plugin = this;
+		
+		this.getLogger().warning("You might want to make a backup of your world! ;)");
 		
 		this.getServer().getPluginManager().registerEvents(new ClickListener(this), this);
 		this.getServer().getPluginManager().registerEvents(new InventoryListener(this), this);
