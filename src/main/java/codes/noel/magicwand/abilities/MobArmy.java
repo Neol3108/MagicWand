@@ -21,6 +21,7 @@ public class MobArmy extends Ability
 	{
 		BlockData bd = Material.SPAWNER.createBlockData("");
 		FallingBlock fb = player.getWorld().spawnFallingBlock(player.getLocation().add(0, 1, 0), bd);
+		fb.setDropItem(false);
 		fb.setVelocity(player.getLocation().getDirection().multiply(1.3).add(new Vector(0, .5, 0)));
 		spawners.add(fb.getUniqueId());
 	}
