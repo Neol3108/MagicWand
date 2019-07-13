@@ -25,7 +25,6 @@ public class Comet extends Ability {
 		Ability self = this;
 		BukkitScheduler scheduler = plugin.getServer().getScheduler();
 		
-		self.playFirework(fireball.getLocation(), FireworkEffect.builder().withColor(Color.RED, Color.BLUE, Color.PURPLE).with(Type.BALL_LARGE).withTrail().build());
 		int id = scheduler.scheduleSyncRepeatingTask(plugin, new Runnable() {
 			
 			@Override
@@ -34,7 +33,7 @@ public class Comet extends Ability {
 					scheduler.cancelTask(comets.get(uuid));
 					comets.remove(uuid);
 				}
-				self.playFirework(fireball.getLocation(), FireworkEffect.builder().withColor(Color.RED, Color.BLUE, Color.PURPLE).with(Type.BALL_LARGE).withTrail().build());
+				self.playFirework(fireball.getLocation(), FireworkEffect.builder().withColor(Color.RED, Color.BLUE, Color.PURPLE).with(Type.BALL).withTrail().build());
 			}
 		}, 0L, 1L);
 		comets.put(fireball.getUniqueId(), id);
